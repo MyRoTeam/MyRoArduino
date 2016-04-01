@@ -24,8 +24,10 @@ void setup() {
   mySerial.begin(115200);
 
   //Arduino<--->BLE<--->Phone
-  
 
+  digitalWrite(11,LOW);
+  digitalWrite(13, LOW);
+ 
 }
 
 void loop() {
