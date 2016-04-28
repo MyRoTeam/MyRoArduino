@@ -85,6 +85,10 @@ void loop() {
             analogWrite(LEFT,0);
             analogWrite(RIGHT,spd);
           }
+          else{
+            analogWrite(LEFT,0);
+            analogWrite(RIGHT,0);
+          }
 
           state = 0;
 
@@ -103,5 +107,5 @@ void loop() {
   
   
 
-}
+
 
