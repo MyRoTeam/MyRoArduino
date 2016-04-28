@@ -1,19 +1,21 @@
 #include <SoftwareSerial.h>
 
 SoftwareSerial mySerial(0,1);//RX,TX
-int counter = 0;
 int state = 0;
-int pin = 0;
-int speedVal = 0;
+char dir = 'X';
+int spd = 0;
+
+
+#define LEFT 5
+#define RIGHT 9
 
 void setup() {
   
-  Serial.begin(115200);
+  Serial.begin(9600);
 
-  pinMode(6 ,OUTPUT);
-  pinMode(13,OUTPUT);
-  pinMode(11,OUTPUT);
-  pinMode(9,OUTPUT);
+  pinMode(LEFT ,OUTPUT);
+  pinMode(RIGHT,OUTPUT);
+
   
   //wait for serial to connect
   while(!Serial){
@@ -21,12 +23,11 @@ void setup() {
   }
 
   //mySerial referes to Serial of BLE Module
-  mySerial.begin(115200);
+  mySerial.begin(9600);
 
   //Arduino<--->BLE<--->Phone
 
-  digitalWrite(11,LOW);
-  digitalWrite(13, LOW);
+
  
 }
 
@@ -36,40 +37,68 @@ void loop() {
   //check if there is data that phone sent to arduino
   if(mySerial.available()){
     byte b = mySerial.read();
-    Serial.print("TEST: ");
-    Serial.println((int)b);
-    if(b == 72 || b == 76){
-      Serial.println("got a valid state");
-      state = b;
-      if(counter != 1)counter++;
-      Serial.print("counter: ");
-      Serial.print(counter);
+
+    //X = 88
+    
+    if(b == 88){
+      if(state == 0 || state ==2){
+        state = 1;
+      }
+     
+      
     }
-    else if(counter == 1 && ((int)b == 13 || (int)b == 11 || (int)b == 9)){
-          pin = (int)b;
-          counter++;      
+    else if(b == 89){
+
+        if(state = 1){
+
+            state = 2;
+          
+        }
+    
+       
     }
-    else if(counter == 2){
-          speedVal = (int)b;
-          speedVal = (abs(speedVal - 255) + 10) * 10;
-          counter = 0;
+    else{
+
+      if(state == 1){
+
+          Serial.println("This is a direction value");
+          if(b == 70) dir = 'F';
+          else if(b == 76) dir = 'L';
+          else if(b == 82) dir = 'R';
+          else if(b == 66) dir = 'B';
+
+      }
+      else if(state == 2){
+
+          Serial.println("This is a speed value");
+          spd = b;
+
+          if(dir == 'F') {
+            analogWrite(LEFT,spd);
+            analogWrite(RIGHT,spd);
+          }
+          else if(dir == 'L'){
+            analogWrite(LEFT,spd);
+            analogWrite(RIGHT,0);
+          }
+          else if(dir == 'R'){
+            analogWrite(LEFT,0);
+            analogWrite(RIGHT,spd);
+          }
+
+          state = 0;
+
+      }
+
+
     }
+    }
+
    
   }
 
   
-   if(state == 72 && speedVal != 0 && pin != 0){
-      Serial.println("got high");
-      digitalWrite(pin,HIGH);
-      delay(speedVal);
-      digitalWrite(pin,LOW);
-      delay(speedVal);
-    }
-    else if(state == 76 && pin != 0){
-      Serial.println("got low");
-      digitalWrite(pin,LOW);
-    }
- 
+   
   
   
   
