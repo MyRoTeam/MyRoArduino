@@ -1,13 +1,14 @@
 #include <SoftwareSerial.h>
 
-SoftwareSerial mySerial(0,1);//RX,TX
+SoftwareSerial mySerial(1,2);//RX,TX
 int state = 0;
 char dir = 'X';
 int spd = 0;
 
 
-#define LEFT 5
-#define RIGHT 9
+#define RIGHT 5
+#define LEFT 9
+#define BACK 12
 
 void setup() {
   
@@ -15,6 +16,7 @@ void setup() {
 
   pinMode(LEFT ,OUTPUT);
   pinMode(RIGHT,OUTPUT);
+  pinMode(BACK, OUTPUT);
 
   
   //wait for serial to connect
@@ -27,7 +29,7 @@ void setup() {
 
   //Arduino<--->BLE<--->Phone
 
-
+  
  
 }
 
@@ -37,7 +39,7 @@ void loop() {
   //check if there is data that phone sent to arduino
   if(mySerial.available()){
     byte b = mySerial.read();
-
+    Serial.println("Data available");
     //X = 88
     
     if(b == 88){
@@ -71,23 +73,32 @@ void loop() {
       else if(state == 2){
 
           Serial.println("This is a speed value");
-          spd = b;
+          if (b == 48) {
+            spd = 0;
+          } else {
+            spd = 255;
+          }
+          
 
           if(dir == 'F') {
             analogWrite(LEFT,spd);
             analogWrite(RIGHT,spd);
+            analogWrite(BACK,0);
           }
           else if(dir == 'L'){
             analogWrite(LEFT,spd);
             analogWrite(RIGHT,0);
+            analogWrite(BACK,0);
           }
           else if(dir == 'R'){
-            analogWrite(LEFT,0);
-            analogWrite(RIGHT,spd);
+            analogWrite(BACK,spd);
+            analogWrite(LEFT,spd);
+            analogWrite(RIGHT, 0);
           }
           else{
             analogWrite(LEFT,0);
             analogWrite(RIGHT,0);
+            analogWrite(BACK,0);
           }
 
           state = 0;
